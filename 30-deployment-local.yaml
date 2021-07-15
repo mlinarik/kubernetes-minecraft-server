@@ -1,4 +1,3 @@
-# docker run -d -it -v /path/on/host:/data -e EULA=TRUE -p 25565:25565 --name mc itzg/minecraft-server
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,40 +21,20 @@ spec:
           claimName: minecraft-data-pvc
       containers:
       - name: minecraft-server
-        image: itzg/minecraft-server:latest
+        image: mlinarik/minecraft:paper-1.16.5-740
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         resources:
           limits:
-            memory: 2Gi
+            memory: 8Gi
           requests:
-            memory: 1.5Gi
-        env:
-          - name:  EULA
-            value: 'TRUE'
-          - name: MODE
-            value: creative
-          - name: MOTD
-            value: Your super-cool minecraft server
-          - name: ALLOW_FLIGHT
-            value: 'TRUE'
+            memory: 4Gi
         ports:
         - containerPort: 25565
           name: minecraft
         volumeMounts:
           - name: minecraft-data
-            mountPath:  /data
-        readinessProbe:
-          exec:
-            command:
-            - mcstatus
-            - 127.0.0.1
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 30
-        livenessProbe:
-          exec:
-            command:
-            - mcstatus
-            - 127.0.0.1
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 30
+            mountPath:  /mcdata
+      nodeSelector:
+        disktype: ssdf
